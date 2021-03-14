@@ -1,6 +1,8 @@
+import React from 'react'
+
 import '../styles/globals.css'
 
-function MyApp({ Component, pageProps }) {
+const MyApp: React.FC<any> = ({ Component, pageProps }) => {
   return <Component {...pageProps} />
 }
 
