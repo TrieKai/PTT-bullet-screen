@@ -54,18 +54,6 @@ export const DELETE = async (url: string, params: object) => {
   }
 };
 
-export const POSTFILE = async (url: string, formData: any, params: object) => {
-  if (params) {
-    url += getParams(params);
-  }
-  try {
-    const resp = await axios.post(url, formData);
-    return resp.data;
-  } catch (error) {
-    return handleError(error);
-  }
-};
-
 const getParams = (params: object) => {
   let paramsUrl = "?";
   try {

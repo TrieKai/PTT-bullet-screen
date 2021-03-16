@@ -11,7 +11,7 @@ interface bullet {
 }
 
 interface crawlerResp {
-  data: { userId: string; message: string; time: string }[];
+  results: { userId: string; message: string; time: string }[];
 }
 
 const Home = () => {
@@ -32,28 +32,26 @@ const Home = () => {
   }, [cnavasElf]);
 
   const init = async () => {
-    await fetchData();
+    const events = new EventSource("api/crawler");
+    console.log(events);
+    events.onmessage = (event) => {
+      const data: crawlerResp = JSON.parse(event.data);
+      data.results.forEach((item, i) => {
+        // default bullet height is 23px
+        const slots = Math.floor((canvasHeight - 30) / 23); // total slots number
+        const y = Math.floor(Math.random() * slots) * 23 + 20;
+        const bullet: bullet = {
+          text: item.userId.replace(/\s/g, "") + item.message,
+          x: canvasWidth,
+          y: y,
+          color: `#${(((1 << 24) * Math.random()) | 0).toString(16)}`,
+        };
+        setTimeout(() => {
+          bulletList.push(bullet);
+        }, 10 * i);
+      });
+    };
     render();
-  };
-
-  const fetchData = async () => {
-    const resp: crawlerResp = await GET("api/crawler", null);
-    console.log(resp.data);
-    resp.data.forEach((item, i) => {
-      const y = canvasHeight * Math.random() + 20;
-      const maxPosY = canvasHeight - 10;
-      console.log(canvasHeight, y);
-      const bullet: bullet = {
-        text: item.userId.replace(/\s/g, "") + item.message,
-        x: canvasWidth,
-        y: y > maxPosY ? maxPosY : y,
-        color: `#${(((1 << 24) * Math.random()) | 0).toString(16)}`,
-      };
-      setTimeout(() => {
-        bulletList.push(bullet);
-      }, 500 * i);
-    });
-    console.log(bulletList);
   };
 
   const render = () => {
