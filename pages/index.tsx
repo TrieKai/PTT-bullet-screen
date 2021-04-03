@@ -32,9 +32,11 @@ const Home = () => {
   }, [cnavasElf]);
 
   const init = async () => {
+    // await GET("api/crawler", null);
     const events = new EventSource("api/crawler");
     console.log(events);
     events.onmessage = (event) => {
+      console.log(event);
       const data: crawlerResp = JSON.parse(event.data);
       data.results.forEach((item, i) => {
         // default bullet height is 23px
