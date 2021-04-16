@@ -3,7 +3,7 @@ import cheerio from "cheerio";
 import puppeteer from "puppeteer";
 
 const pttCrawler = async (response: NextApiResponse) => {
-  const pttUrl = "https://www.ptt.cc/bbs/Stock/M.1617369009.A.904.html";
+  const pttUrl = "https://www.ptt.cc/bbs/Stock/M.1618553215.A.06B.html";
   return new Promise(async (resolve, reject) => {
     const results = [];
     const browser = await puppeteer.launch({ headless: true });

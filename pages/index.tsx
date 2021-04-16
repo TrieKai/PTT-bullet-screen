@@ -1,9 +1,10 @@
 import Head from "next/head";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
-import { GET } from "../utils/request";
+import styles from "./index.module.scss";
 
 interface bullet {
+  time: string;
   text: string;
   x?: number;
   y?: number;
@@ -17,7 +18,8 @@ interface crawlerResp {
 const Home = () => {
   const cnavasElf = useRef<HTMLCanvasElement>();
   // const inputRef = useRef<HTMLInputElement>();
-  const bulletList: bullet[] = [];
+  const [messages, setMessages] = useState<bullet[]>([]);
+  let bulletList: bullet[] = [];
   let canvasWidth: number;
   let canvasHeight: number;
 
@@ -32,31 +34,40 @@ const Home = () => {
   }, [cnavasElf]);
 
   const init = async () => {
-    // await GET("api/crawler", null);
+    let tempBulletList = [];
     const events = new EventSource("api/crawler");
     console.log(events);
     events.onmessage = (event) => {
       console.log(event);
+      let ms = 0;
       const data: crawlerResp = JSON.parse(event.data);
-      data.results.forEach((item, i) => {
-        // default bullet height is 23px
-        const slots = Math.floor((canvasHeight - 30) / 23); // total slots number
-        const y = Math.floor(Math.random() * slots) * 23 + 20;
-        const bullet: bullet = {
-          text: item.userId.replace(/\s/g, "") + item.message,
-          x: canvasWidth,
-          y: y,
-          color: `#${(((1 << 24) * Math.random()) | 0).toString(16)}`,
-        };
-        setTimeout(() => {
-          bulletList.push(bullet);
-        }, 10 * i);
-      });
+      const comments = data.results;
+      const diff = comments.length - tempBulletList.length;
+      console.log(diff, comments.length);
+      if (diff > 0) {
+        for (let i = comments.length - diff; i < comments.length; i++) {
+          // default bullet height is 23px
+          const slots = Math.floor((canvasHeight - 30) / 23); // total slots number
+          const y = Math.floor(Math.random() * slots) * 23 + 20;
+          const bullet: bullet = {
+            time: comments[i].time,
+            text: comments[i].userId.replace(/\s/g, "") + comments[i].message,
+            x: canvasWidth,
+            y: y,
+            color: `#${(((1 << 24) * Math.random()) | 0).toString(16)}`,
+          };
+          tempBulletList = [...tempBulletList, bullet];
+          setTimeout(() => {
+            setMessages(tempBulletList);
+            bulletList.push(bullet);
+          }, 500 * ms++);
+        }
+      }
     };
-    render();
+    renderBullets();
   };
 
-  const render = () => {
+  const renderBullets = () => {
     // if (bulletList.length === 0) return;
     const canvas = cnavasElf.current;
     const ctx = canvas.getContext("2d");
@@ -74,7 +85,7 @@ const Home = () => {
       }
     });
 
-    window.requestAnimationFrame(render);
+    window.requestAnimationFrame(renderBullets);
   };
 
   // const addBullet = (message: string) => {
@@ -88,11 +99,16 @@ const Home = () => {
   // };
 
   return (
-    <div>
-      <canvas
-        ref={cnavasElf}
-        style={{ width: "100%", height: "500px" }}
-      ></canvas>
+    <main className={styles.main}>
+      <canvas ref={cnavasElf} className={styles.bulletCanvas}></canvas>
+      <div className={styles.chatroomBox}>
+        {messages.map((bullet, i) => (
+          <div className={styles.messageBox} key={`bullet_${i}`}>
+            <span className={styles.messageTime}>{bullet.time}</span>
+            {bullet.text}
+          </div>
+        ))}
+      </div>
       {/* <input ref={inputRef} type="text" />
       <button
         onClick={() => {
@@ -101,7 +117,7 @@ const Home = () => {
       >
         send
       </button> */}
-    </div>
+    </main>
   );
 };
 

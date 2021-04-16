@@ -1,0 +1,27 @@
+.main {
+  display: flex;
+  height : 100%;
+
+  .bulletCanvas {
+    width : 70%;
+    height: 500px;
+  }
+
+  .chatroomBox {
+    width           : 30%;
+    height          : 100%;
+    background-color: #dedede;
+    overflow-y      : auto;
+
+    .messageBox {
+      margin   : 5px 0;
+      padding  : 0 5px;
+      font-size: 1.2rem;
+
+      .messageTime {
+        font-size: 0.875rem;
+        color    : slategray;
+      }
+    }
+  }
+}
