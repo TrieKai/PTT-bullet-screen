@@ -2,14 +2,13 @@ import { NextApiRequest, NextApiResponse } from "next";
 import cheerio from "cheerio";
 import puppeteer from "puppeteer";
 
-const pttCrawler = async (response: NextApiResponse) => {
-  const pttUrl = "https://www.ptt.cc/bbs/Stock/M.1618553215.A.06B.html";
+const pttCrawler = async (response: NextApiResponse, url: string) => {
   return new Promise(async (resolve, reject) => {
     const results = [];
     const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
     page.setDefaultNavigationTimeout(0);
-    await page.goto(pttUrl);
+    await page.goto(url);
     const autoUpdateBtn = await page.waitForXPath(
       "//div[contains(text(), '推文自動更新已關閉')]"
     );
@@ -35,11 +34,12 @@ const pttCrawler = async (response: NextApiResponse) => {
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   console.log("crawler");
+  console.log(req.query);
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Content-Type", "text/event-stream;charset=utf-8");
   res.setHeader("Cache-Control", "no-cache, no-transform");
   res.setHeader("X-Accel-Buffering", "no");
 
-  await pttCrawler(res);
+  await pttCrawler(res, req.query.url as string);
   res.end("done");
 };
